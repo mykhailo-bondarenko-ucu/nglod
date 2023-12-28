@@ -6,7 +6,7 @@ git+https://github.com/tinyobjloader/tinyobjloader.git
 pybind11
 trimesh>=3.0
 tqdm
-Pillow
+Pillow==9.5.0
 scipy
 scikit-image
 six==1.12.0
