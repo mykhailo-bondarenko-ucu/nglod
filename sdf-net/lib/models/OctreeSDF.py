@@ -139,7 +139,7 @@ class OctreeSDF(BaseLOD):
             
             # Get distance
             else: 
-                d = curr_decoder(ex_sample)
+                # d = curr_decoder(ex_sample)
 
                 # Return distance if in prediction mode
                 if lod is not None and lod == i:

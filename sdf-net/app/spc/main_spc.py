@@ -143,6 +143,8 @@ class SPCTrainer(Trainer):
         l2_loss = 0.0
         _l2_loss = 0.0
 
+        l2_losses_byd = []
+
         preds = []
 
         if self.args.return_lst:
@@ -154,6 +156,7 @@ class SPCTrainer(Trainer):
             res = 2**(self.args.base_lod + i)
             _l2_loss = ((pred - res * gts)**2).sum()
             l2_loss += _l2_loss
+            l2_losses_byd.append(float(_l2_loss.item()))
 
         loss += l2_loss * self.args.l2_loss
         
@@ -163,6 +166,9 @@ class SPCTrainer(Trainer):
         self.log_dict['l2_loss'] += _l2_loss.item()
         self.log_dict['total_loss'] += l2_loss.item()
         self.log_dict['total_iter_count'] += batch_size
+
+        for (d, l2_loss_d) in enumerate(l2_losses_byd):
+            self.log_dict[f'l2_loss_d{d}'] = l2_loss_d
 
         # Backpropagate
         loss.backward()

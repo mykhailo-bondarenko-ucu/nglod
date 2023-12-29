@@ -382,6 +382,9 @@ class Trainer(object):
 
         self.log_dict['l2_loss'] /= self.log_dict['total_iter_count'] + 1e-6
         log_text += ' | l2 loss: {:>.3E}'.format(self.log_dict['l2_loss'])
+
+        for d in range(self.args.num_lods):
+            self.writer.add_scalar(f'Loss/l2_loss/{d}', self.log_dict[f'l2_loss_d{d}'], epoch)
         
         self.writer.add_scalar('Loss/l2_loss', self.log_dict['l2_loss'], epoch)
 
