@@ -257,6 +257,9 @@ class Trainer(object):
         self.log_dict['total_loss'] = 0
         self.log_dict['total_iter_count'] = 0
 
+        for d in range(self.args.num_lods):
+            self.log_dict[f'l2_loss_d{d}'] = 0
+
         self.timer.check('pre_epoch done')
 
     def grow(self, epoch):
