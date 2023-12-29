@@ -111,21 +111,11 @@ class OccupancyTester(object):
         self.args = args 
         self.args_str = args_str
         
-        self.args.epochs += 1
-        
         # Set device to use
         self.use_cuda = torch.cuda.is_available()
         self.device = torch.device('cuda' if self.use_cuda else 'cpu')
         device_name = torch.cuda.get_device_name(device=self.device)
         log.info(f'Using {device_name} with CUDA v{torch.version.cuda}')
-
-        self.latents = None
-        
-        # In-training variables
-        self.train_data_loader = None
-        self.val_data_loader = None
-        self.dataset_size = None
-        self.log_dict = {}
 
         # Initialize
         self.set_dataset()
