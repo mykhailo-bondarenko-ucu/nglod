@@ -185,10 +185,10 @@ class OccupancyTester(object):
             (self.near_surf_dl, "Surface", 0.9),
         ]:
             pred_occupancies_by_lod = [
-                np.array([], dtype=np.bool8)
+                np.array([], dtype=np.bool_)
                 for lod in range(self.args.num_lods)
             ]
-            gt_occupancies = np.array([], dtype=np.bool8)
+            gt_occupancies = np.array([], dtype=np.bool_)
 
             for data in dl:
                 pts = data[0].to(self.device)
