@@ -197,7 +197,7 @@ class Trainer(object):
 
         self.scheduler = optim.lr_scheduler.MultiStepLR(
             self.optimizer,
-            [25, 100],
+            [25, 100, 200],
             gamma=0.1
         )
 
