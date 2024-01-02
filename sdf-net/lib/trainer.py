@@ -197,7 +197,7 @@ class Trainer(object):
 
         self.scheduler = optim.lr_scheduler.MultiStepLR(
             self.optimizer,
-            [25, 75, 125, 175, 225],
+            [25, 50, 75],
             gamma=0.1
         )
 
@@ -338,8 +338,12 @@ class Trainer(object):
             for i, lod in enumerate(self.loss_lods):
                 preds.append(self.net.sdf(pts, lod=lod))
 
-        for pred in preds:
+        for d in range(self.args.num_lods):
+            self.log_dict[f'l2_loss_d{d}'] = 0
+
+        for pred, cur_lod in zip(preds, self.loss_lods):
             _l2_loss = ((pred - gts)**2).sum()
+            self.log_dict[f'l2_loss_d{cur_lod}'] = float(_l2_loss.item())
             l2_loss += _l2_loss
 
         loss += l2_loss
