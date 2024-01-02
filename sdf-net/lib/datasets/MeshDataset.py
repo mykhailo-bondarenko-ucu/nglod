@@ -81,6 +81,9 @@ class MeshDataset(Dataset):
             self.nrm = self.nrm.cpu()
         else:
             self.pts = point_sample(self.V, self.F, self.sample_mode, self.num_samples)
+            pts2, _ = sample_surface(self.V, self.F, self.num_samples*3)
+            self.pts = torch.cat((self.pts, pts2))
+            
 
         self.d = compute_sdf(self.V.cuda(), self.F.cuda(), self.pts.cuda())   
 
