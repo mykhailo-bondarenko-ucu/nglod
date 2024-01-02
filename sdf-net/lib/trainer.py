@@ -128,6 +128,8 @@ class Trainer(object):
         #self.timer.check('set_dataset')
         self.set_optimizer()
         self.timer.check('set_optimizer')
+        self.set_scheduler()
+        self.timer.check('set_scheduler')
         self.set_renderer()
         self.timer.check('set_renderer')
         self.set_logger()
@@ -187,6 +189,17 @@ class Trainer(object):
             self.optimizer = optim.SGD(self.net.parameters(), lr=self.args.lr, momentum=0.8)
         else:
             raise ValueError('Invalid optimizer.')
+    
+    def set_scheduler(self):
+        """
+        Set learning rate scheduler.
+        """
+
+        self.scheduler = optim.lr_scheduler.MultiStepLR(
+            self.optimizer,
+            [25, 100],
+            gamma=0.1
+        )
 
     def set_renderer(self):
         """
@@ -366,6 +379,8 @@ class Trainer(object):
             self.save_model(epoch)
         if epoch % self.args.render_every == 0:
             self.render_tb(epoch)
+
+        self.scheduler.step()
 
         self.timer.check('post_epoch done')
     
