@@ -197,8 +197,9 @@ class OccupancyTester(object):
                 gt_occupancies = np.append(gt_occupancies, sdf_gts.cpu().numpy().flatten() < 0)
 
                 sdf_preds_by_lod = []
-                for lod in range(self.args.num_lods):
-                    sdf_preds_by_lod.append(self.net.sdf(pts, lod=lod))
+                with torch.no_grad():
+                    for lod in range(self.args.num_lods):
+                        sdf_preds_by_lod.append(self.net.sdf(pts, lod=lod))
 
                 for sdf_pred, lod in zip(sdf_preds_by_lod, range(self.args.num_lods)):
                     # l2_loss = ((sdf_pred - sdf_gts)**2).sum()
