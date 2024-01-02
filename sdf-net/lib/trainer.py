@@ -197,7 +197,7 @@ class Trainer(object):
 
         self.scheduler = optim.lr_scheduler.MultiStepLR(
             self.optimizer,
-            [25, 100, 200],
+            [25, 75, 125, 175, 225],
             gamma=0.1
         )
 
@@ -500,6 +500,8 @@ class Trainer(object):
             if self.args.validator is not None and epoch % self.args.valid_every == 0:
                 self.validate(epoch)
                 self.timer.check('validate')
+
+        self.save_model(self.args.epochs - 1)
 
         self.writer.close()
     
