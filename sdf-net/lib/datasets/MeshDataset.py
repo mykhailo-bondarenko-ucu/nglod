@@ -82,9 +82,14 @@ class MeshDataset(Dataset):
         else:
             self.pts = point_sample(self.V, self.F, self.sample_mode, self.num_samples)
             print(f"{self.pts.shape = }")
-            pts2, _ = sample_surface(self.V, self.F, self.num_samples*5)
-            print(f"{pts2.shape = }")
-            self.pts = torch.cat((self.pts, pts2))
+
+            noise_std=1e-2
+            pts_surf, _ = sample_surface(self.V, self.F, self.num_samples*5)
+            variance = noise_std ** 2
+            pts_surf += torch.randn_like(pts_surf) * variance
+            print(f"{pts_surf.shape = }")
+
+            self.pts = torch.cat((self.pts, pts_surf))
             print(f"Concat shape: {self.pts.shape}")
 
         self.d = compute_sdf(self.V.cuda(), self.F.cuda(), self.pts.cuda())   
