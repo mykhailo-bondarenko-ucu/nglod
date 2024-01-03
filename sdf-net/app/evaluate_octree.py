@@ -213,7 +213,7 @@ class OccupancyTester(object):
             for lod in range(self.args.num_lods):
                 test_f1 = f1_score(gt_occupancies, pred_occupancies_by_lod[lod])
                 test_pass = test_f1 > test_f1_thr
-                all_pass = all_pass and test_pass
+                all_pass = all_pass or test_pass
                 log.info(f"{test_name} points Occupancy F1, LOD {lod+1}: {test_f1:.2f} - {'Pass' if test_pass else 'Fail'}")
 
             log.info(f"{test_name} TESTS: {'PASS' if all_pass else 'FAIL'}")

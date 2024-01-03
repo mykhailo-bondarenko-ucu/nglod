@@ -195,10 +195,12 @@ class Trainer(object):
         Set learning rate scheduler.
         """
 
+        steps = [25, 50, 100, 150, 200, 250]
+        gamma = 0.1
+        self.writer.add_text("Scheduler/steps", f"{steps}")
+        self.writer.add_text("Scheduler/gamma", f"{gamma}")
         self.scheduler = optim.lr_scheduler.MultiStepLR(
-            self.optimizer,
-            [25, 50, 100],
-            gamma=0.1
+            self.optimizer, steps, gamma=gamma
         )
 
     def set_renderer(self):
@@ -343,7 +345,7 @@ class Trainer(object):
 
         for pred, cur_lod in zip(preds, self.loss_lods):
             _l2_loss = ((pred - gts)**2).sum()
-            self.log_dict[f'l2_loss_d{cur_lod}'] = float(_l2_loss.item())
+            self.log_dict[f'l2_loss_d{cur_lod}'] += _l2_loss.item()
             l2_loss += _l2_loss
 
         loss += l2_loss
@@ -406,6 +408,7 @@ class Trainer(object):
         log_text += ' | l2 loss: {:>.3E}'.format(self.log_dict['l2_loss'])
 
         for d in range(self.args.num_lods):
+            self.log_dict[f'l2_loss_d{d}'] /= self.log_dict['total_iter_count'] + 1e-6
             self.writer.add_scalar(f'Loss/l2_loss/{d}', self.log_dict[f'l2_loss_d{d}'], epoch)
         
         self.writer.add_scalar('Loss/l2_loss', self.log_dict['l2_loss'], epoch)
