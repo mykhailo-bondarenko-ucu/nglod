@@ -340,9 +340,6 @@ class Trainer(object):
             for i, lod in enumerate(self.loss_lods):
                 preds.append(self.net.sdf(pts, lod=lod))
 
-        for d in range(self.args.num_lods):
-            self.log_dict[f'l2_loss_d{d}'] = 0
-
         for pred, cur_lod in zip(preds, self.loss_lods):
             _l2_loss = ((pred - gts)**2).sum()
             self.log_dict[f'l2_loss_d{cur_lod}'] += _l2_loss.item()
