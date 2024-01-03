@@ -221,7 +221,7 @@ class OccupancyTester(object):
 
 def main():
     args, args_str = parse_options()
-    log.info(f'Parameters: \n{args_str}')
+    # log.info(f'Parameters: \n{args_str}')
     log.info(f'Training on {args.dataset_path}')
     model = OccupancyTester(args, args_str)
     model.test_occupancy()

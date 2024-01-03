@@ -42,7 +42,7 @@ if __name__ == "__main__":
     """Main program."""
 
     args, args_str = parse_options()
-    log.info(f'Parameters: \n{args_str}')
+    # log.info(f'Parameters: \n{args_str}')
     log.info(f'Training on {args.dataset_path}')
     model = Trainer(args, args_str)
     model.train()
