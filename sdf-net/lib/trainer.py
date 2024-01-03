@@ -120,6 +120,8 @@ class Trainer(object):
         self.log_dict = {}
 
         # Initialize
+        self.set_logger()
+        self.timer.check('set_logger')
         self.set_dataset()
         self.timer.check('set_dataset')
         self.set_network()
@@ -132,8 +134,6 @@ class Trainer(object):
         self.timer.check('set_scheduler')
         self.set_renderer()
         self.timer.check('set_renderer')
-        self.set_logger()
-        self.timer.check('set_logger')
         self.set_validator()
         self.timer.check('set_validator')
         
@@ -223,7 +223,7 @@ class Trainer(object):
         self.writer = SummaryWriter(self.log_dir, purge_step=0)
         self.writer.add_text('Parameters', self.args_str)
 
-        log.info('Model configured and ready to go')
+        log.info('Logger set')
 
     def set_validator(self):
         """
