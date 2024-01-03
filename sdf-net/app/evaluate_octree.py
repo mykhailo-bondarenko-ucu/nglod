@@ -214,6 +214,7 @@ class OccupancyTester(object):
                 test_pass = test_f1 > test_f1_thr
                 all_pass = all_pass or test_pass
                 log.info(f"{test_name} points Occupancy F1, LOD {lod+1}: {test_f1:.2f} - {'Pass' if test_pass else 'Fail'}")
+                self.writer.add_text(f'{test_name}/F1/{lod+1}', test_f1)
 
             log.info(f"{test_name} TESTS: {'PASS' if all_pass else 'FAIL'}")
 
