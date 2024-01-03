@@ -48,8 +48,7 @@ def sample_near_surface_2(
     """
     distrib = area_weighted_distribution(V, F)
     samples = sample_surface(V, F, num_samples, distrib)[0]
-    variance = noise_std ** 2
-    samples += torch.randn_like(samples) * variance
+    samples += torch.randn_like(samples) * noise_std
     return samples
 
 

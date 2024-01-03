@@ -128,7 +128,7 @@ class SPCDataset(Dataset):
             near = sample_near_surface(self.net.V.cuda(), 
                                     self.net.F.cuda(), 
                                     size, 
-                                    variance=1.0/(2**level))
+                                    std_dev=1.0/(2**level))
             trace = sample_surface(self.net.V.cuda(),
                                 self.net.F.cuda(),
                                 size)[0]

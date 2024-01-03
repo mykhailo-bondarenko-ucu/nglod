@@ -28,7 +28,7 @@ def sample_near_surface(
     V : torch.Tensor,
     F : torch.Tensor, 
     num_samples: int, 
-    variance : float = 0.01,
+    std_dev : float = 0.01,
     distrib=None):
     """Sample points near the mesh surface.
 
@@ -41,5 +41,5 @@ def sample_near_surface(
     if distrib is None:
         distrib = area_weighted_distribution(V, F)
     samples = sample_surface(V, F, num_samples, distrib)[0]
-    samples += torch.randn_like(samples) * variance
+    samples += torch.randn_like(samples) * std_dev
     return samples

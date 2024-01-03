@@ -84,8 +84,7 @@ class MeshDataset(Dataset):
 
             noise_std=1e-2
             pts_surf, _ = sample_surface(self.V, self.F, self.num_samples*5)
-            variance = noise_std ** 2
-            pts_surf += torch.randn_like(pts_surf) * variance
+            pts_surf += torch.randn_like(pts_surf) * noise_std
 
             self.pts = torch.cat((self.pts, pts_surf))
 
