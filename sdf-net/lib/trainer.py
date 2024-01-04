@@ -366,6 +366,8 @@ class Trainer(object):
             raise NotImplementedError
     
     def test_occupancy(self, epoch):
+        all_tests_pass = True
+
         for (dl, test_name, test_f1_thr) in [
             (self.uniform_dl, "Volume", 0.95),
             (self.near_surf_dl, "Surface", 0.9),
@@ -416,6 +418,10 @@ class Trainer(object):
                 self.writer.add_scalar(f'{test_name}/F1/{lod+1}', test_f1, epoch)
 
             log.info(f"{test_name} TESTS: {'PASS' if all_pass else 'FAIL'}")
+
+            all_tests_pass = all_tests_pass and all_pass
+
+        return all_tests_pass
 
 
     #######################
@@ -608,6 +614,8 @@ class Trainer(object):
         if self.args.validator is not None and self.args.valid_only:
             self.validate(0)
             return
+        
+        last_ep = 0
 
         for epoch in range(self.args.epochs):    
             self.timer.check('new epoch...')
@@ -629,9 +637,15 @@ class Trainer(object):
                 self.validate(epoch)
                 self.timer.check('validate')
 
-            self.test_occupancy(epoch)
+            all_tests_pass = self.test_occupancy(epoch)
 
-        self.save_model(self.args.epochs - 1)
+            last_ep = epoch
+
+            if all_tests_pass:
+                log.info(f"All tests passed, ending training...")
+                break
+
+        self.save_model(last_ep)
 
         self.writer.close()
     
