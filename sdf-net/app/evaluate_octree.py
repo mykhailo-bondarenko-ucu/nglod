@@ -38,14 +38,6 @@ def sample_near_surface_2(
     num_samples: int,
     noise_std=1e-2,
 ):
-    """Sample points near the mesh surface.
-
-    Args:
-        V (torch.Tensor): #V, 3 array of vertices
-        F (torch.Tensor): #F, 3 array of indices
-        num_samples (int): number of surface samples
-        distrib: distribution to use. By default, area-weighted distribution is used
-    """
     distrib = area_weighted_distribution(V, F)
     samples = sample_surface(V, F, num_samples, distrib)[0]
     samples += torch.randn_like(samples) * noise_std
@@ -185,7 +177,7 @@ class OccupancyTester(object):
         ]:
             pred_occupancies_by_lod = [
                 np.array([], dtype=np.bool_)
-                for lod in range(self.args.num_lods)
+                for _ in range(self.args.num_lods)
             ]
             gt_occupancies = np.array([], dtype=np.bool_)
 

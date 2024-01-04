@@ -32,6 +32,8 @@ import logging as log
 from lib.trainer import Trainer
 from lib.options import parse_options
 
+from pathlib import Path
+
 # Set logger display format
 log.basicConfig(format='[%(asctime)s] [INFO] %(message)s', 
                 datefmt='%d/%m %H:%M:%S',
@@ -42,7 +44,14 @@ if __name__ == "__main__":
     """Main program."""
 
     args, args_str = parse_options()
-    # log.info(f'Parameters: \n{args_str}')
-    log.info(f'Training on {args.dataset_path}')
-    model = Trainer(args, args_str)
-    model.train()
+    dataset_root = Path(args.dataset_path)
+    log.info(f'Training objects in {dataset_root}')
+    assert os.path.isdir(dataset_root)
+    obj_files = [f for f in os.listdir(dataset_root) if f.endswith('.obj')]
+    for file in obj_files:
+        file_path = dataset_root / file
+        log.info(f'Training on dataset: {file_path}')
+        args.dataset_path = str(file_path)
+        args.exp_name = f"train_{str(file)[:-4]}"
+        model = Trainer(args, args_str)
+        model.train()

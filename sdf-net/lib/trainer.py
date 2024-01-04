@@ -41,6 +41,7 @@ import torch.optim as optim
 from torch.utils.tensorboard import SummaryWriter
 from torch.utils.data import Dataset, DataLoader
 from tqdm.auto import tqdm
+from sklearn.metrics import f1_score
 
 from lib.datasets import *
 from lib.diffutils import positional_encoding, gradient
@@ -49,6 +50,63 @@ from lib.renderer import Renderer
 from lib.tracer import *
 from lib.utils import PerfTimer, image_to_np, suppress_output
 from lib.validator import *
+
+from time import time
+
+from lib.torchgp import load_obj, compute_sdf, sample_surface, normalize, sample_uniform, area_weighted_distribution
+
+def sample_near_surface_2(
+    V : torch.Tensor,
+    F : torch.Tensor, 
+    num_samples: int,
+    noise_std=1e-2,
+):
+    distrib = area_weighted_distribution(V, F)
+    samples = sample_surface(V, F, num_samples, distrib)[0]
+    samples += torch.randn_like(samples) * noise_std
+    return samples
+
+class OccupancyTestingDataset(Dataset):
+    def __init__(self, 
+        args, 
+        num_samples,
+        dataset_path,
+        sample_mode: str,
+    ):
+        self.args = args
+        self.dataset_path = dataset_path
+        self.sample_mode = sample_mode
+        self.num_samples = num_samples
+
+        assert sample_mode in ['near', 'rand']
+        
+        self.V, self.F = load_obj(self.dataset_path)
+        self.V, self.F = normalize(self.V, self.F)
+        self.mesh = self.V[self.F]
+        self.resample()
+
+    def resample(self):
+        """Resample SDF samples."""
+        if self.sample_mode == 'near':
+            self.pts = sample_near_surface_2(self.V, self.F, self.num_samples)
+        elif self.sample_mode == 'rand':
+            self.pts = sample_uniform(self.num_samples).to(self.V.device)
+        self.d = compute_sdf(self.V.cuda(), self.F.cuda(), self.pts.cuda())
+        self.d = self.d[...,None]
+        self.d = self.d.cpu()
+        self.pts = self.pts.cpu()
+
+    def __getitem__(self, idx: int):
+        """Retrieve point sample."""
+        return self.pts[idx], self.d[idx]
+            
+    def __len__(self):
+        """Return length of dataset (number of _samples_)."""
+        return self.pts.size()[0]
+
+    def num_shapes(self):
+        """Return length of dataset (number of _mesh models_)."""
+        return 1
 
 class Trainer(object):
     """
@@ -160,6 +218,18 @@ class Trainer(object):
                                             shuffle=True, pin_memory=True, num_workers=0)
         self.timer.check('create_dataloader')
         log.info("Loaded mesh dataset")
+
+        self.near_surf_ds = OccupancyTestingDataset(self.args, sample_mode='near')
+        log.info("Near Surface Size: {}".format(len(self.near_surf_ds)))
+        self.near_surf_dl = DataLoader(self.near_surf_ds, batch_size=self.args.batch_size, 
+                                            shuffle=False, pin_memory=True, num_workers=0)
+        log.info("Loaded Near Surface Dataset")
+
+        self.uniform_ds = OccupancyTestingDataset(self.args, sample_mode='rand')
+        log.info("Near Surface Size: {}".format(len(self.uniform_ds)))
+        self.uniform_dl = DataLoader(self.uniform_ds, batch_size=self.args.batch_size, 
+                                            shuffle=False, pin_memory=True, num_workers=0)
+        log.info("Loaded Near Surface Dataset")
             
     def set_network(self):
         """
@@ -292,6 +362,58 @@ class Trainer(object):
             self.loss_lods = list(range(0, self.args.num_lods))[-1:] 
         else:
             raise NotImplementedError
+    
+    def test_occupancy(self, epoch):
+        for (dl, test_name, test_f1_thr) in [
+            (self.uniform_dl, "Volume", 0.95),
+            (self.near_surf_dl, "Surface", 0.9),
+        ]:
+            pred_occupancies_by_lod = [
+                np.array([], dtype=np.bool_)
+                for _ in self.loss_lods
+            ]
+            gt_occupancies = np.array([], dtype=np.bool_)
+
+            n_inference_points = 0
+            total_inference_time = 0
+
+            for data in dl:
+                pts = data[0].to(self.device)
+                sdf_gts = data[1].to(self.device)
+
+                gt_occupancies = np.append(gt_occupancies, sdf_gts.cpu().numpy().flatten() < 0)
+
+                sdf_preds_by_lod = []
+                
+                with torch.no_grad():
+                    bt = time()
+                    for lod in self.loss_lods:
+                        sdf_preds_by_lod.append(self.net.sdf(pts, lod=lod))
+                        n_inference_points += pts.shape[0]
+                    total_inference_time += time() - bt
+
+                for sdf_pred, lod in zip(sdf_preds_by_lod, self.loss_lods):
+                    pred_occupancies_by_lod[lod] = np.append(
+                        pred_occupancies_by_lod[lod],
+                        sdf_pred.cpu().numpy().flatten() < 0
+                    )
+            
+            avg_time = total_inference_time / n_inference_points
+            self.writer.add_scalar(f'{test_name}/AverageTime', avg_time, epoch)
+
+            all_pass = True
+
+            for lod in self.loss_lods:
+                test_f1 = (
+                    f1_score(gt_occupancies, pred_occupancies_by_lod[lod]) +
+                    f1_score(pred_occupancies_by_lod[lod], gt_occupancies)
+                ) / 2
+                test_pass = test_f1 > test_f1_thr
+                all_pass = all_pass or test_pass
+                log.info(f"{test_name} points Occupancy F1, LOD {lod+1}: {test_f1:.2f} - {'Pass' if test_pass else 'Fail'}")
+                self.writer.add_scalar(f'{test_name}/F1/{lod+1}', test_f1, epoch)
+
+            log.info(f"{test_name} TESTS: {'PASS' if all_pass else 'FAIL'}")
 
 
     #######################
@@ -504,6 +626,8 @@ class Trainer(object):
             if self.args.validator is not None and epoch % self.args.valid_every == 0:
                 self.validate(epoch)
                 self.timer.check('validate')
+
+            self.test_occupancy(epoch)
 
         self.save_model(self.args.epochs - 1)
 
