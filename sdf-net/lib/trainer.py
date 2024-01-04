@@ -153,7 +153,7 @@ class Trainer(object):
             model_name (str): model nametag
         """
         #torch.multiprocessing.set_start_method('spawn')
-        multiprocessing.set_start_method('spawn')
+        # multiprocessing.set_start_method('spawn')
 
         self.args = args 
         self.args_str = args_str
