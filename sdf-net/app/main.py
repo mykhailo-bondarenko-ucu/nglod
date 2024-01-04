@@ -53,7 +53,5 @@ if __name__ == "__main__":
         log.info(f'Training on dataset: {file_path}')
         args.dataset_path = str(file_path)
         args.exp_name = f"train_{str(file)[:-4]}"
-        print(f"{args.dataset_path = }")
-        print(f"{args.exp_name = }")
         model = Trainer(args, args_str)
         model.train()
