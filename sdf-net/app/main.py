@@ -47,7 +47,7 @@ if __name__ == "__main__":
     dataset_root = Path(args.dataset_path)
     log.info(f'Training objects in {dataset_root}')
     assert os.path.isdir(dataset_root)
-    obj_files = [f for f in os.listdir(dataset_root) if f.endswith('.obj')]
+    obj_files = sorted([f for f in os.listdir(dataset_root) if f.endswith('.obj')])
     for file in obj_files:
         file_path = dataset_root / file
         log.info(f'Training on dataset: {file_path}')
