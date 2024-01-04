@@ -267,9 +267,9 @@ class Trainer(object):
         Set learning rate scheduler.
         """
 
-        steps = [10, 25, 50, 100, 150, 200, 250]
+        # steps = [10, 25, 50, 100, 150, 200, 250]
         # steps = [3, 7, 25, 50, 100, 150, 200, 250]
-        # steps = [25, 50, 100, 150, 200, 250]
+        steps = [25, 75, 175, 375, 775]
         gamma = 0.1
         self.writer.add_text("Scheduler/steps", f"{steps}")
         self.writer.add_text("Scheduler/gamma", f"{gamma}")
