@@ -372,10 +372,10 @@ class Trainer(object):
             (self.uniform_dl, "Volume", 0.95),
             (self.near_surf_dl, "Surface", 0.9),
         ]:
-            pred_occupancies_by_lod = [
-                np.array([], dtype=np.bool_)
-                for _ in self.loss_lods
-            ]
+            pred_occupancies_by_lod = {
+                lod: np.array([], dtype=np.bool_)
+                for lod in self.loss_lods
+            }
             gt_occupancies = np.array([], dtype=np.bool_)
 
             n_inference_points = 0
