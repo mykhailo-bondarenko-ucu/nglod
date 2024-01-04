@@ -403,7 +403,7 @@ class Trainer(object):
             avg_time = total_inference_time / n_inference_points
             self.writer.add_scalar(f'{test_name}/AverageTime', avg_time, epoch)
 
-            all_pass = True
+            all_pass = False
 
             for lod in self.loss_lods:
                 test_f1 = (
