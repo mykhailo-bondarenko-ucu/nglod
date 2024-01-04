@@ -368,6 +368,8 @@ class Trainer(object):
             raise NotImplementedError
     
     def test_occupancy(self, epoch):
+        self.net.eval()
+
         all_tests_pass = True
 
         for (dl, test_name, test_f1_thr) in [
@@ -379,33 +381,27 @@ class Trainer(object):
                 for lod in self.loss_lods
             }
             gt_occupancies = np.array([], dtype=np.bool_)
-
-            n_inference_points = 0
-            total_inference_time = 0
-
-            for data in dl:
-                pts = data[0].to(self.device)
-                sdf_gts = data[1].to(self.device)
-
-                gt_occupancies = np.append(gt_occupancies, sdf_gts.cpu().numpy().flatten() < 0)
-
-                sdf_preds_by_lod = []
-                
-                with torch.no_grad():
-                    bt = time()
-                    for lod in self.loss_lods:
-                        sdf_preds_by_lod.append(self.net.sdf(pts, lod=lod))
-                        n_inference_points += pts.shape[0]
-                    total_inference_time += time() - bt
-
-                for sdf_pred, lod in zip(sdf_preds_by_lod, self.loss_lods):
-                    pred_occupancies_by_lod[lod] = np.append(
-                        pred_occupancies_by_lod[lod],
-                        sdf_pred.cpu().numpy().flatten() < 0
-                    )
             
-            avg_time = total_inference_time / n_inference_points
-            self.writer.add_scalar(f'{test_name}/AverageTime', avg_time, epoch)
+            for (lod_i, lod) in enumerate(self.loss_lods):
+                total_inference_time = 0
+                n_inference_points = 0
+                for data in dl:
+                    if lod_i == 0:
+                        sdf_gts = data[1].to(self.device)
+                        gt_occupancies = np.append(gt_occupancies, sdf_gts.cpu().numpy().flatten() < 0)
+                    
+                    pts = data[0].to(self.device)
+                    n_inference_points += pts.shape[0]
+                    with torch.no_grad():
+                        bi = time()
+                        sdf_pred = self.net.sdf(pts, lod=lod)
+                        total_inference_time += time() - bi
+                        pred_occupancies_by_lod[lod] = np.append(
+                            pred_occupancies_by_lod[lod],
+                            sdf_pred.cpu().numpy().flatten() < 0
+                        )
+                avg_time = total_inference_time / n_inference_points
+                self.writer.add_scalar(f'{test_name}/AverageTime/{lod}', avg_time, epoch)
 
             all_pass = False
 
