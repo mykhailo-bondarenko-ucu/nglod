@@ -222,16 +222,16 @@ class Trainer(object):
         num_tests = 100000
 
         self.near_surf_ds = OccupancyTestingDataset(self.args, num_tests, self.args.dataset_path, sample_mode='near')
-        log.info("Near Surface Size: {}".format(len(self.near_surf_ds)))
+        log.info("Near Surface Dataset Size: {}".format(len(self.near_surf_ds)))
         self.near_surf_dl = DataLoader(self.near_surf_ds, batch_size=self.args.batch_size, 
                                             shuffle=False, pin_memory=True, num_workers=0)
         log.info("Loaded Near Surface Dataset")
 
         self.uniform_ds = OccupancyTestingDataset(self.args, num_tests, self.args.dataset_path, sample_mode='rand')
-        log.info("Near Surface Size: {}".format(len(self.uniform_ds)))
+        log.info("Volume Dataset Size: {}".format(len(self.uniform_ds)))
         self.uniform_dl = DataLoader(self.uniform_ds, batch_size=self.args.batch_size, 
                                             shuffle=False, pin_memory=True, num_workers=0)
-        log.info("Loaded Near Surface Dataset")
+        log.info("Loaded Volume Dataset Dataset")
             
     def set_network(self):
         """
