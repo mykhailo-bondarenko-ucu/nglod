@@ -82,11 +82,11 @@ class MeshDataset(Dataset):
         else:
             self.pts = point_sample(self.V, self.F, self.sample_mode, self.num_samples)
 
-            noise_std=1e-2
-            pts_surf, _ = sample_surface(self.V, self.F, self.num_samples*5)
-            pts_surf += torch.randn_like(pts_surf) * noise_std
+            # noise_std=1e-2
+            # pts_surf, _ = sample_surface(self.V, self.F, self.num_samples*5)
+            # pts_surf += torch.randn_like(pts_surf) * noise_std
 
-            self.pts = torch.cat((self.pts, pts_surf))
+            # self.pts = torch.cat((self.pts, pts_surf))
 
         self.d = compute_sdf(self.V.cuda(), self.F.cuda(), self.pts.cuda())   
 
