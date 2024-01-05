@@ -270,7 +270,8 @@ class Trainer(object):
         # steps = [10, 25, 50, 100, 150, 200, 250]
         # steps = [3, 7, 25, 50, 100, 150, 200, 250]
         # steps = [5, 25, 75, 175, 375, 775]
-        steps = [100, 200]
+        # steps = [100, 200]
+        steps = [25, 50]
         gamma = 0.1
         self.writer.add_text("Scheduler/steps", f"{steps}")
         self.writer.add_text("Scheduler/gamma", f"{gamma}")
@@ -409,7 +410,7 @@ class Trainer(object):
             for lod in self.loss_lods:
                 test_f1 = (
                     f1_score(gt_occupancies, pred_occupancies_by_lod[lod]) +
-                    f1_score(pred_occupancies_by_lod[lod], gt_occupancies)
+                    f1_score(~gt_occupancies, ~pred_occupancies_by_lod[lod])
                 ) / 2
                 test_pass = test_f1 > test_f1_thr
                 all_pass = all_pass or test_pass
