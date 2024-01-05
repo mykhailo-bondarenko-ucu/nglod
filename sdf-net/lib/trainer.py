@@ -271,12 +271,17 @@ class Trainer(object):
         # steps = [3, 7, 25, 50, 100, 150, 200, 250]
         # steps = [5, 25, 75, 175, 375, 775]
         # steps = [100, 200]
-        steps = [75]
-        gamma = 0.1
-        self.writer.add_text("Scheduler/steps", f"{steps}")
-        self.writer.add_text("Scheduler/gamma", f"{gamma}")
-        self.scheduler = optim.lr_scheduler.MultiStepLR(
-            self.optimizer, steps, gamma=gamma
+
+        # steps = [75]
+        # gamma = 0.1
+        # self.writer.add_text("Scheduler/steps", f"{steps}")
+        # self.writer.add_text("Scheduler/gamma", f"{gamma}")
+        # self.scheduler = optim.lr_scheduler.MultiStepLR(
+        #     self.optimizer, steps, gamma=gamma
+        # )
+
+        self.scheduler = optim.lr_scheduler.LambdaLR(
+            self.optimizer, lambda ep: 0.0001 if ep % 5 == 0 else 0.001
         )
 
     def set_renderer(self):
