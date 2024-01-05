@@ -158,7 +158,7 @@ class Trainer(object):
         self.args = args 
         self.args_str = args_str
         
-        self.args.epochs += 1
+        # self.args.epochs += 1
 
         self.timer = PerfTimer(activate=self.args.perf)
         self.timer.reset()
