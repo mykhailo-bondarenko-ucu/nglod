@@ -53,4 +53,4 @@ if __name__ == "__main__":
         trainer = Trainer(args, args_str)
         trainer.loss_lods = list(range(0, trainer.args.num_lods))
         for i in range(10):
-            trainer.test_occupancy(i, log=False)
+            trainer.test_occupancy(i, log_f1=False)
