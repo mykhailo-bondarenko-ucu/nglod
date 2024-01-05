@@ -49,10 +49,10 @@ if __name__ == "__main__":
     assert os.path.isdir(dataset_root)
     obj_files = sorted([f for f in os.listdir(dataset_root) if f.endswith('.obj')])
     for file in obj_files:
-        if file in ['0.obj', '20.obj', '36.obj']:
-            file_path = dataset_root / file
-            log.info(f'Training on dataset: {file_path}')
-            args.dataset_path = str(file_path)
-            args.exp_name = f"train_{str(file)[:-4]}"
-            model = Trainer(args, args_str)
-            model.train()
+        # if file in ['0.obj', '20.obj', '36.obj']:
+        file_path = dataset_root / file
+        log.info(f'Training on dataset: {file_path}')
+        args.dataset_path = str(file_path)
+        args.exp_name = f"train_{str(file)[:-4]}"
+        model = Trainer(args, args_str)
+        model.train()
