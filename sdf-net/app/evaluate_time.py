@@ -52,5 +52,5 @@ if __name__ == "__main__":
         args.exp_name = f"train_{str(file)[:-4]}"
         trainer = Trainer(args, args_str)
         trainer.loss_lods = list(range(0, trainer.args.num_lods))
-        for i in range(10):
+        for i in range(2):
             trainer.test_occupancy(i, log_f1=False)
